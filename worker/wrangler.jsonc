@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ava-agent-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-01-28",
+  "compatibility_flags": ["nodejs_compat"],
+  "durable_objects": {
+    "bindings": [{ "name": "AVA_AGENT", "class_name": "AvaAgent" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["AvaAgent"] }],
+  "vars": {
+    "AGENT_MODEL": "openai/gpt-4o-mini"
+  },
+  "observability": { "enabled": true }
+}

@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Expo native projects (Continuous Native Generation — regenerate with `expo prebuild`)
+app/android/
+app/ios/
+app/.expo/
+app/dist/
+app/web-build/
+
+# Build output
+server/dist/
+worker/.wrangler/
+*.apk
+*.aab
+*.ipa
+
+# Secrets / local env
+.env
+.env.local
+**/.dev.vars
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+
+# Logs / OS cruft
+*.log
+.DS_Store
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/

@@ -1,0 +1,89 @@
+{
+  "expo": {
+    "name": "Ava",
+    "slug": "ava-agent",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "ava-agent",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.avaagent.app"
+    },
+    "android": {
+      "package": "com.avaagent.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundColor": "#0A1612",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "SCHEDULE_EXACT_ALARM",
+        "READ_CONTACTS",
+        "WRITE_CONTACTS"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png"
+    },
+    "experiments": {
+      "typedRoutes": true
+    },
+    "plugins": [
+      "expo-router",
+      "expo-status-bar",
+      "expo-sqlite",
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Ava needs calendar access so your agent can check and create events for you."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Ava needs your location to give location-aware suggestions."
+        }
+      ],
+      [
+        "expo-notifications",
+        {}
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Ava needs the microphone to hear what you say.",
+          "speechRecognitionPermission": "Ava needs speech recognition to transcribe what you say."
+        }
+      ],
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Ava needs contacts access to find people you ask it to message."
+        }
+      ],
+      "expo-sharing",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Ava uses Face ID to keep your calendar, contacts, and expenses private."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-empty.png",
+          "imageWidth": 100,
+          "resizeMode": "contain",
+          "backgroundColor": "#0A1612"
+        }
+      ],
+      "./plugins/withAvaSigning"
+    ],
+    "backgroundColor": "#0A1612"
+  }
+}
