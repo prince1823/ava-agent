@@ -123,26 +123,4 @@ scheduled notifications. Biometric lock is off, because browsers have no such ha
 `npx expo export --platform web` produces a static build in `dist/` if you want to host it;
 a hosted page needs the server reachable over `wss://` instead of `ws://`.
 
-## Demo script for an interview
 
-1. "What's on my calendar today?" → watch it call `list_calendar_events` live.
-2. "Add a dentist appointment tomorrow at 3pm and remind me an hour before" → multi-step: creates
-   a calendar event **and** schedules a notification, chained in one turn — then shows the
-   confirmation sheet for each real action before committing.
-3. "How much did I spend on food this week?" → queries the local SQLite expense DB.
-4. "Remember that I'm vegetarian" then, in a later session, "What do you remember about me?" →
-   durable memory across app restarts.
-5. "I promised Priya I'd send the invoice by Friday — keep me to it" → Ava resolves the
-   weekday from the injected date table and files a promise. Open **Promises** to finish it,
-   set a reminder, or have Ava draft the message.
-6. "What if I skip the gym tonight and order takeaway?" → `simulate_plan` dry-runs the plan:
-   timeline, spending delta, conflicts and anything irreversible, with nothing written.
-   The same result renders on the **Simulator** screen.
-7. Open **Privacy** → every outbound request, what it was for and how big it was. Toggle
-   cloud-minimised mode and watch the optional calls stop.
-
-Talking points if asked "why is this hard": the client/server tool-execution split, streaming over
-a mobile connection, human-in-the-loop confirmation as an agent-safety pattern, and that the
-backend never ships the API key to the device. Also worth mentioning: the simulator gives the
-agent a safe way to reason about consequences, and the promise tracker turns a one-off chat into
-something that survives the session.
