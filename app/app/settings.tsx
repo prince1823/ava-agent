@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, Switch, Text, TextInput, View, Pressable } from "react-native";
+import { Alert, ScrollView, StyleSheet, Switch, View, Pressable } from "react-native";
+import { Text, TextInput } from "../src/components/Text";
 import { Stack, router } from "expo-router";
 import { colors, radius, spacing, typography } from "../src/theme";
 import { getSetting, setSetting, clearAllConversations } from "../src/db/db";

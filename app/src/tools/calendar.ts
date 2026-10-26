@@ -55,6 +55,7 @@ export async function createCalendarEvent(args: {
   end: string;
   notes?: string;
   location?: string;
+  attendeeEmail?: string;
 }) {
   const calendar = await getWritableCalendar();
   const created = await calendar.createEvent({
@@ -64,7 +65,34 @@ export async function createCalendarEvent(args: {
     notes: args.notes,
     location: args.location,
   });
-  return { id: created.id, title: args.title, start: args.start, end: args.end };
+
+  let invited = false;
+  if (args.attendeeEmail) {
+    try {
+      await created.createAttendee({
+        email: args.attendeeEmail,
+        name: args.attendeeEmail,
+        role: Calendar.AttendeeRole.REQUIRED,
+        status: Calendar.AttendeeStatus.PENDING,
+        type: Calendar.AttendeeType.PERSON,
+      });
+      invited = true;
+    } catch {
+      // Attendee invites only actually send an email when the event lives on a
+      // synced account (e.g. Google Calendar) — a purely local calendar silently
+      // can't do this. Report it rather than claiming an invite went out.
+      invited = false;
+    }
+  }
+
+  return {
+    id: created.id,
+    title: args.title,
+    start: args.start,
+    end: args.end,
+    attendeeEmail: args.attendeeEmail ?? null,
+    invited,
+  };
 }
 
 export async function deleteCalendarEvent(eventId: string) {

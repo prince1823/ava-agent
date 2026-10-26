@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
-import { Animated, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Animated, Image, Pressable, StyleSheet, View } from "react-native";
+import { Text, TextInput } from "./Text";
 import * as Haptics from "expo-haptics";
 import {
   ExpoSpeechRecognitionModule,
@@ -8,8 +9,16 @@ import {
 import { colors, radius, spacing } from "../theme";
 import { useAgentStore } from "../store/agentStore";
 import { MicIcon } from "./MicIcon";
-import { StopIcon } from "./Icons";
+import { ImageIcon, StopIcon } from "./Icons";
 import { VoiceOverlay } from "./VoiceOverlay";
+import { pickImage } from "../tools/imagePicker";
+import type { AgentMode } from "../types/agent";
+
+const MODES: Array<{ key: AgentMode; label: string; hint: string }> = [
+  { key: "chat", label: "chat", hint: "Just talk to Ava" },
+  { key: "plan", label: "plan", hint: "Dry-run before doing anything" },
+  { key: "promise", label: "promise", hint: "Track something you said you'd do" },
+];
 
 export function Composer() {
   const [text, setText] = useState("");
@@ -17,8 +26,12 @@ export function Composer() {
   const isStreaming = useAgentStore((s) => s.isStreaming);
   const stopGeneration = useAgentStore((s) => s.stopGeneration);
   const status = useAgentStore((s) => s.status);
+  const mode = useAgentStore((s) => s.mode);
+  const setMode = useAgentStore((s) => s.setMode);
   const [listening, setListening] = useState(false);
   const [voiceOpen, setVoiceOpen] = useState(false);
+  const [image, setImage] = useState<string | null>(null);
+  const [pickingImage, setPickingImage] = useState(false);
   const level = useRef(new Animated.Value(0)).current;
 
   useSpeechRecognitionEvent("start", () => setListening(true));
@@ -35,9 +48,24 @@ export function Composer() {
 
   const handleSend = () => {
     const trimmed = text.trim();
-    if (!trimmed || isStreaming || status !== "open") return;
-    sendMessage(trimmed);
+    if ((!trimmed && !image) || isStreaming || status !== "open") return;
+    // A screenshot with no caption still needs some text for the turn — the
+    // model reads the image regardless, this is just what shows in the bubble.
+    sendMessage(trimmed || "Here's a screenshot — see what you can do with it.", image ? { image } : undefined);
     setText("");
+    setImage(null);
+  };
+
+  const handlePickImage = async () => {
+    try {
+      setPickingImage(true);
+      const picked = await pickImage();
+      if (picked) setImage(picked);
+    } catch (err) {
+      Alert.alert("Couldn't open photos", err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setPickingImage(false);
+    }
   };
 
   const handleMic = async () => {
@@ -77,13 +105,14 @@ export function Composer() {
     setVoiceOpen(false);
     const trimmed = text.trim();
     if (trimmed && status === "open" && !isStreaming) {
-      sendMessage(trimmed);
+      sendMessage(trimmed, image ? { image } : undefined);
       setText("");
+      setImage(null);
     }
   };
 
   return (
-    <View style={styles.wrap}>
+    <View style={styles.outer}>
       <VoiceOverlay
         visible={voiceOpen}
         level={level}
@@ -92,6 +121,30 @@ export function Composer() {
         onCancel={cancelVoice}
         onSend={sendVoice}
       />
+      <View style={styles.modeRow}>
+        {MODES.map((m) => (
+          <Pressable
+            key={m.key}
+            style={[styles.modePill, mode === m.key && styles.modePillActive]}
+            onPress={() => setMode(m.key)}
+            accessibilityLabel={m.hint}
+          >
+            <Text style={[styles.modeText, mode === m.key && styles.modeTextActive]}>{m.label}</Text>
+          </Pressable>
+        ))}
+      </View>
+      {image && (
+        <View style={styles.previewRow}>
+          <View style={styles.previewChip}>
+            <Image source={{ uri: image }} style={styles.previewThumb} />
+            <Text style={styles.previewLabel}>screenshot attached</Text>
+            <Pressable onPress={() => setImage(null)} hitSlop={8} style={styles.previewRemove}>
+              <Text style={styles.previewRemoveText}>✕</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+      <View style={styles.wrap}>
       <View style={styles.pill}>
         <TextInput
           style={styles.input}
@@ -102,8 +155,11 @@ export function Composer() {
           multiline
           onSubmitEditing={handleSend}
         />
+        <Pressable style={styles.iconButton} onPress={handlePickImage} disabled={pickingImage} accessibilityLabel="Attach a photo or screenshot">
+          <ImageIcon size={19} color={colors.textPrimary} />
+        </Pressable>
         <Pressable
-          style={[styles.micButton, listening && !voiceOpen && styles.micActive]}
+          style={[styles.iconButton, listening && !voiceOpen && styles.micActive]}
           onPress={handleMic}
           onLongPress={startVoice}
           delayLongPress={350}
@@ -117,25 +173,54 @@ export function Composer() {
         </Pressable>
       ) : (
         <Pressable
-          style={[styles.sendButton, !text.trim() && styles.sendButtonDisabled]}
+          style={[styles.sendButton, (!text.trim() && !image || status !== "open") && styles.sendButtonDisabled]}
           onPress={handleSend}
-          disabled={!text.trim()}
+          disabled={(!text.trim() && !image) || status !== "open"}
         >
           <Text style={styles.sendText}>↑</Text>
         </Pressable>
       )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  outer: {
+    backgroundColor: colors.bg,
+  },
+  modeRow: {
+    flexDirection: "row",
+    gap: spacing(1.5),
+    paddingHorizontal: spacing(4),
+    paddingTop: spacing(2),
+  },
+  modePill: {
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceAlt,
+    paddingHorizontal: spacing(3),
+    paddingVertical: spacing(1),
+  },
+  modePillActive: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent,
+  },
+  modeText: {
+    color: colors.textSecondary,
+    fontSize: 11.5,
+    fontWeight: "600",
+  },
+  modeTextActive: {
+    color: colors.accent,
+  },
   wrap: {
     flexDirection: "row",
     alignItems: "flex-end",
     gap: spacing(2),
     paddingHorizontal: spacing(4),
     paddingVertical: spacing(3),
-    backgroundColor: colors.bg,
   },
   pill: {
     flex: 1,
@@ -155,7 +240,7 @@ const styles = StyleSheet.create({
     maxHeight: 120,
     fontSize: 14,
   },
-  micButton: {
+  iconButton: {
     width: 36,
     height: 36,
     borderRadius: radius.pill,
@@ -163,6 +248,45 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   micActive: { backgroundColor: colors.accent },
+  previewRow: {
+    paddingHorizontal: spacing(4),
+    paddingTop: spacing(2),
+  },
+  previewChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: spacing(2),
+    backgroundColor: colors.bgElevated,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing(1.5),
+    paddingRight: spacing(3),
+  },
+  previewThumb: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.sm,
+  },
+  previewLabel: {
+    color: colors.textSecondary,
+    fontSize: 11.5,
+    fontWeight: "600",
+  },
+  previewRemove: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: colors.surfaceAlt,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  previewRemoveText: {
+    color: colors.textSecondary,
+    fontSize: 10,
+    fontWeight: "700",
+  },
   sendButton: {
     width: 48,
     height: 48,

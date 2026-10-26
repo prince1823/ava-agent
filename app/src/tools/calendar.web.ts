@@ -78,6 +78,7 @@ export async function createCalendarEvent(args: {
   end: string;
   notes?: string;
   location?: string;
+  attendeeEmail?: string;
 }) {
   const events = load();
   const id = `web-${Date.now().toString(36)}`;
@@ -89,7 +90,15 @@ export async function createCalendarEvent(args: {
     location: args.location ?? null,
   });
   save(events);
-  return { id, title: args.title, start: args.start, end: args.end, simulated: true };
+  return {
+    id,
+    title: args.title,
+    start: args.start,
+    end: args.end,
+    attendeeEmail: args.attendeeEmail ?? null,
+    invited: false,
+    simulated: true,
+  };
 }
 
 export async function deleteCalendarEvent(eventId: string) {

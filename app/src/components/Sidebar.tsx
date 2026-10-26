@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, Dimensions, Easing, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Animated, Dimensions, Easing, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "./Text";
 import { router } from "expo-router";
 import { colors, radius, spacing } from "../theme";
 import { useAgentStore } from "../store/agentStore";
@@ -82,7 +83,7 @@ export function Sidebar({ visible, onClose }: { visible: boolean; onClose: () =>
               }}
               onLongPress={() => removeConversation(c.id)}
             >
-              <Text numberOfLines={1} style={styles.rowTitle}>
+              <Text numberOfLines={1} style={styles.rowTitle} preserveCase>
                 {c.title}
               </Text>
               <Text style={styles.rowTime}>{relativeTime(c.updated_at)}</Text>

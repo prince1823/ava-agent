@@ -74,7 +74,7 @@ export function AnimatedSplash({
 
 const styles = StyleSheet.create({
   glow: { position: "absolute", top: H / 2 - W * 0.9, left: W * -0.1, width: W * 1.2, height: W * 1.8 },
-  glowImage: { width: "100%", height: "100%", tintColor: "#38E2A4" },
+  glowImage: { width: "100%", height: "100%", tintColor: "#B9A6FF" },
   root: { ...StyleSheet.absoluteFill, backgroundColor: colors.bg, zIndex: 100 },
   logo: { position: "absolute", top: "50%", left: "50%", width: LOGO, height: LOGO, marginTop: -LOGO / 2, marginLeft: -LOGO / 2 },
   textBlock: { position: "absolute", top: "50%", left: 0, right: 0, marginTop: LOGO / 2 + 26, alignItems: "center", gap: 12 },

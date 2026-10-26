@@ -1,9 +1,11 @@
 import React, { memo, useState } from "react";
-import { Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Linking, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "./Text";
 import MarkdownDisplay from "react-native-markdown-display";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import { colors, radius } from "../theme";
+import { FONT_WEIGHTS } from "../theme/font";
 import { CheckIcon, CopyIcon } from "./Icons";
 
 const MONO = Platform.select({ ios: "Menlo", default: "monospace" });
@@ -27,7 +29,7 @@ function CodeBlock({ code, language }: { code: string; language?: string }) {
         </Pressable>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <Text style={styles.codeText} selectable>
+        <Text style={styles.codeText} selectable preserveCase>
           {text}
         </Text>
       </ScrollView>
@@ -54,15 +56,15 @@ function MarkdownBase({ children }: { children: string }) {
 export const Markdown = memo(MarkdownBase);
 
 const mdStyles = StyleSheet.create({
-  body: { color: colors.textPrimary, fontSize: 15, lineHeight: 23 },
+  body: { color: colors.textPrimary, fontSize: 15, lineHeight: 23, fontFamily: FONT_WEIGHTS.regular },
   paragraph: { marginTop: 0, marginBottom: 10, flexWrap: "wrap" },
-  strong: { fontWeight: "700", color: colors.textPrimary },
+  strong: { fontWeight: "700", color: colors.textPrimary, fontFamily: FONT_WEIGHTS.bold },
   em: { fontStyle: "italic" },
   s: { textDecorationLine: "line-through", color: colors.textSecondary },
-  heading1: { fontSize: 22, fontWeight: "800", marginTop: 6, marginBottom: 8, color: colors.textPrimary },
-  heading2: { fontSize: 19, fontWeight: "700", marginTop: 6, marginBottom: 6, color: colors.textPrimary },
-  heading3: { fontSize: 16, fontWeight: "700", marginTop: 4, marginBottom: 4, color: colors.textPrimary },
-  heading4: { fontSize: 15, fontWeight: "700", marginTop: 4, marginBottom: 4, color: colors.textPrimary },
+  heading1: { fontSize: 22, fontWeight: "800", marginTop: 6, marginBottom: 8, color: colors.textPrimary, fontFamily: FONT_WEIGHTS.bold },
+  heading2: { fontSize: 19, fontWeight: "700", marginTop: 6, marginBottom: 6, color: colors.textPrimary, fontFamily: FONT_WEIGHTS.bold },
+  heading3: { fontSize: 16, fontWeight: "700", marginTop: 4, marginBottom: 4, color: colors.textPrimary, fontFamily: FONT_WEIGHTS.semibold },
+  heading4: { fontSize: 15, fontWeight: "700", marginTop: 4, marginBottom: 4, color: colors.textPrimary, fontFamily: FONT_WEIGHTS.semibold },
   bullet_list: { marginBottom: 8 },
   ordered_list: { marginBottom: 8 },
   list_item: { marginBottom: 4, flexDirection: "row" },
@@ -79,7 +81,7 @@ const mdStyles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   blockquote: {
-    backgroundColor: "#38E2A414",
+    backgroundColor: "#B9A6FF14",
     borderLeftWidth: 3,
     borderLeftColor: colors.accent,
     paddingHorizontal: 12,

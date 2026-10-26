@@ -290,7 +290,7 @@ function JsonView({ profile }: { profile: UserProfile }) {
         <View style={styles.dots}>
           <View style={[styles.dot, { backgroundColor: "#FF6B81" }]} />
           <View style={[styles.dot, { backgroundColor: "#F5C56B" }]} />
-          <View style={[styles.dot, { backgroundColor: "#38E2A4" }]} />
+          <View style={[styles.dot, { backgroundColor: "#B9A6FF" }]} />
         </View>
         <Text style={styles.jsonTitle}>ava-memory.json</Text>
         <Pressable onPress={() => Share.share({ message: text })} hitSlop={8}>
@@ -335,11 +335,11 @@ const styles = StyleSheet.create({
   kvKey: { color: colors.textSecondary, fontSize: 13, width: 82 },
   kvVal: { flex: 1, color: colors.textPrimary, fontSize: 14, fontWeight: "600" },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: spacing(2) },
-  chip: { flexDirection: "row", alignItems: "center", gap: spacing(2), backgroundColor: colors.accentSoft, borderRadius: radius.pill, paddingVertical: 7, paddingLeft: spacing(3), paddingRight: spacing(2.5), borderWidth: 1, borderColor: "#38E2A433", maxWidth: "100%" },
+  chip: { flexDirection: "row", alignItems: "center", gap: spacing(2), backgroundColor: colors.accentSoft, borderRadius: radius.pill, paddingVertical: 7, paddingLeft: spacing(3), paddingRight: spacing(2.5), borderWidth: 1, borderColor: "#B9A6FF33", maxWidth: "100%" },
   chipText: { color: colors.textPrimary, fontSize: 13, flexShrink: 1 },
   chipX: { color: colors.textFaint, fontSize: 12 },
   person: { flexDirection: "row", alignItems: "center", gap: spacing(3) },
-  avatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.accentSoft, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#38E2A455" },
+  avatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.accentSoft, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#B9A6FF55" },
   avatarText: { color: colors.accent, fontWeight: "800" },
   personBody: { flex: 1 },
   personName: { color: colors.textPrimary, fontSize: 14, fontWeight: "600" },
@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
   jsonBody: { padding: spacing(3.5) },
   jsonLine: { fontFamily: MONO, fontSize: 12, lineHeight: 18 },
   jsonDefault: { fontFamily: MONO, fontSize: 12, color: colors.textPrimary },
-  jsonKey: { color: "#5BF0BA" },
+  jsonKey: { color: "#C4B5FD" },
   jsonString: { color: "#F2FFF9" },
   jsonNumber: { color: "#F5C56B" },
   jsonKeyword: { color: "#B79CFF" },

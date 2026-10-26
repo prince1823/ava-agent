@@ -65,9 +65,9 @@ function Glow({
 export function BackgroundArt() {
   return (
     <View style={styles.wrap} pointerEvents="none">
-      <Glow color="#38E2A4" size={W * 1.3} top={-H * 0.05} left={-W * 0.15} duration={5000} dx={W * 0.25} dy={H * 0.1} peak={0.5} />
-      <Glow color="#1FBF8A" size={W * 1.1} top={H * 0.4} left={W * 0.2} duration={7000} dx={W * 0.3} dy={H * 0.12} peak={0.4} />
-      <Glow color="#5BF0BA" size={W * 0.9} top={H * 0.15} left={W * 0.3} duration={9000} dx={W * 0.35} dy={H * 0.18} peak={0.32} />
+      <Glow color="#8B5CF6" size={W * 1.3} top={-H * 0.05} left={-W * 0.15} duration={5000} dx={W * 0.25} dy={H * 0.1} peak={0.5} />
+      <Glow color="#F472B6" size={W * 1.1} top={H * 0.4} left={W * 0.2} duration={7000} dx={W * 0.3} dy={H * 0.12} peak={0.35} />
+      <Glow color="#818CF8" size={W * 0.9} top={H * 0.15} left={W * 0.3} duration={9000} dx={W * 0.35} dy={H * 0.18} peak={0.32} />
     </View>
   );
 }

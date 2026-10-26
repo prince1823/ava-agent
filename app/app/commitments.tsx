@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from "react";
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Text, TextInput } from "../src/components/Text";
 import { Stack, router, useFocusEffect } from "expo-router";
 import { colors, radius, spacing, typography } from "../src/theme";
 import { BackgroundArt } from "../src/components/BackgroundArt";
@@ -174,7 +175,9 @@ export default function CommitmentsScreen() {
               return (
                 <View key={row.id} style={styles.card}>
                   <View style={styles.cardHead}>
-                    <Text style={styles.cardTitle}>{row.title}</Text>
+                    <Text style={styles.cardTitle} preserveCase>
+                      {row.title}
+                    </Text>
                     {row.status === "open" ? (
                       <View style={[styles.dueChip, dueChipStyle(dueInfo.tone)]}>
                         <Text style={[styles.dueText, dueTextStyle(dueInfo.tone)]}>{dueInfo.text}</Text>
@@ -186,8 +189,16 @@ export default function CommitmentsScreen() {
                     )}
                   </View>
 
-                  {row.person ? <Text style={styles.person}>with {row.person}</Text> : null}
-                  {row.detail ? <Text style={styles.detail}>{row.detail}</Text> : null}
+                  {row.person ? (
+                    <Text style={styles.person} preserveCase>
+                      with {row.person}
+                    </Text>
+                  ) : null}
+                  {row.detail ? (
+                    <Text style={styles.detail} preserveCase>
+                      {row.detail}
+                    </Text>
+                  ) : null}
 
                   {row.status === "open" ? (
                     <View style={styles.actions}>

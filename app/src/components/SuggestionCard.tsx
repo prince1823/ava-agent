@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, Easing, LayoutChangeEvent, Pressable, StyleSheet, Text, View } from "react-native";
+import { Animated, Easing, LayoutChangeEvent, Pressable, StyleSheet, View } from "react-native";
+import { Text } from "./Text";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { colors, radius, spacing } from "../theme";
 
@@ -50,14 +51,14 @@ export function SuggestionCard({
           <Svg width={size.w} height={size.h} style={StyleSheet.absoluteFill}>
             <Defs>
               <LinearGradient id={`fill-${index}`} x1="0" y1="0" x2="1" y2="1">
-                <Stop offset="0" stopColor="#38E2A4" stopOpacity={0.16} />
-                <Stop offset="0.6" stopColor="#0F1F1A" stopOpacity={0.9} />
-                <Stop offset="1" stopColor="#0A1612" stopOpacity={0.95} />
+                <Stop offset="0" stopColor="#8B5CF6" stopOpacity={0.22} />
+                <Stop offset="0.55" stopColor="#F472B6" stopOpacity={0.14} />
+                <Stop offset="1" stopColor="#15111F" stopOpacity={0.95} />
               </LinearGradient>
               <LinearGradient id={`stroke-${index}`} x1="0" y1="0" x2="1" y2="1">
-                <Stop offset="0" stopColor="#5BF0BA" stopOpacity={0.95} />
-                <Stop offset="0.5" stopColor="#38E2A4" stopOpacity={0.25} />
-                <Stop offset="1" stopColor="#38E2A4" stopOpacity={0.55} />
+                <Stop offset="0" stopColor="#C4B5FD" stopOpacity={0.9} />
+                <Stop offset="0.5" stopColor="#F472B6" stopOpacity={0.4} />
+                <Stop offset="1" stopColor="#818CF8" stopOpacity={0.55} />
               </LinearGradient>
             </Defs>
             <Rect
@@ -101,9 +102,9 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 14,
-    backgroundColor: "#38E2A41F",
+    backgroundColor: "#B9A6FF1F",
     borderWidth: 1,
-    borderColor: "#38E2A455",
+    borderColor: "#B9A6FF55",
     alignItems: "center",
     justifyContent: "center",
   },

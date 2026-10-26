@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Animated, Easing, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Animated, Easing, FlatList, Pressable, StyleSheet, View } from "react-native";
+import { Text } from "../src/components/Text";
 import { KeyboardStickyView } from "../src/components/Keyboard";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useAgentStore } from "../src/store/agentStore";
@@ -17,22 +18,14 @@ import { colors, radius, spacing } from "../src/theme";
 import type { ChatMessage } from "../src/types/agent";
 import { getSpendingInsight } from "../src/db/db";
 
+// Promises/What-if used to be separate suggestion cards here — they're now the
+// "plan"/"promise" mode pills on the composer itself (see Composer.tsx), so the
+// agent is steered by an explicit mode choice right where you type, not by
+// digging through example cards.
 const SUGGESTIONS: Array<{ icon: string; label: string; title: string; prompt: string }> = [
   { icon: "📅", label: "CALENDAR", title: "What's on my schedule today?", prompt: "What's on my calendar today?" },
   { icon: "⏰", label: "REMINDERS", title: "Remind me about dinner tomorrow at 7", prompt: "Add a dinner reminder for tomorrow at 7pm" },
   { icon: "🧠", label: "MEMORY", title: "Remember something about me", prompt: "Remember that I'm vegetarian" },
-  {
-    icon: "🤝",
-    label: "PROMISES",
-    title: "Track a promise I just made",
-    prompt: "I promised Priya I'd send the invoice by Friday — keep me to it",
-  },
-  {
-    icon: "🔮",
-    label: "WHAT IF",
-    title: "Simulate a plan before committing",
-    prompt: "What if I skip the gym tonight and order takeaway instead?",
-  },
 ];
 
 export default function ChatScreen() {

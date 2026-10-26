@@ -52,15 +52,27 @@ export const TOOLS: Record<string, ToolDefinition> = {
 
   create_calendar_event: tool(
     "create_calendar_event",
-    "Create a new event on the user's device calendar. This is a real, visible action — always confirmed with the user first.",
+    "Create a new event on the user's device calendar. This is a real, visible action — always confirmed with the user first. If the event is a meeting with another person and the user gave (or you already know) that person's email, pass attendeeEmail so they actually get invited, not just a private entry on the user's own calendar.",
     {
       type: "object",
       properties: {
-        title: { type: "string" },
+        title: {
+          type: "string",
+          description:
+            "Clear, specific meeting subject a recipient would understand at a glance, e.g. 'Invoice review with Priya' — never a vague title like 'Meeting' or 'Call'.",
+        },
         start: { type: "string", description: "ISO 8601 start datetime" },
         end: { type: "string", description: "ISO 8601 end datetime" },
-        notes: { type: "string" },
+        notes: {
+          type: "string",
+          description: "Short agenda/context for the event — what it's about, one or two sentences.",
+        },
         location: { type: "string" },
+        attendeeEmail: {
+          type: "string",
+          description:
+            "Email of the person being invited, if this is a meeting with someone (not a personal reminder). Omit for solo events.",
+        },
       },
       required: ["title", "start", "end"],
     },

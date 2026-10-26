@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, Easing, Keyboard, Pressable, StyleSheet, Text, View } from "react-native";
+import { Animated, Easing, Image, Keyboard, Pressable, StyleSheet, View } from "react-native";
+import { Text } from "./Text";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import { colors, radius, spacing } from "../theme";
@@ -105,7 +106,10 @@ export function MessageBubble({ message, isLast = false }: { message: ChatMessag
     return (
       <View style={styles.userWrap}>
         <View style={styles.userBubble}>
-          <Text style={styles.userText}>{message.text}</Text>
+          {message.image ? <Image source={{ uri: message.image }} style={styles.userImage} /> : null}
+          <Text style={styles.userText} preserveCase>
+            {message.text}
+          </Text>
         </View>
       </View>
     );
@@ -123,6 +127,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing(3),
   },
   userText: { color: "#0A1612", fontSize: 15, lineHeight: 21, fontWeight: "600" },
+  userImage: { width: "100%", aspectRatio: 1.3, borderRadius: radius.md, marginBottom: spacing(2), backgroundColor: colors.bgElevated },
   assistantRow: { flexDirection: "row", gap: spacing(3), marginVertical: spacing(2.5), alignSelf: "stretch" },
   avatar: {
     width: 30,
@@ -144,9 +149,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing(2),
-    backgroundColor: "#38E2A414",
+    backgroundColor: "#B9A6FF14",
     borderWidth: 1,
-    borderColor: "#38E2A455",
+    borderColor: "#B9A6FF55",
     borderRadius: radius.pill,
     paddingVertical: 9,
     paddingHorizontal: spacing(3.5),

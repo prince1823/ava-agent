@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "../src/components/Text";
 import { Stack, router } from "expo-router";
 import { colors, radius, spacing } from "../src/theme";
 import { BackgroundArt } from "../src/components/BackgroundArt";
@@ -233,8 +234,14 @@ export default function SimulatorScreen() {
                   </View>
                   <View style={styles.rowBody}>
                     <Text style={styles.rowTime}>{new Date(entry.at).toLocaleString()}</Text>
-                    <Text style={styles.rowTitle}>{entry.title}</Text>
-                    {entry.detail ? <Text style={styles.rowDetail}>{entry.detail}</Text> : null}
+                    <Text style={styles.rowTitle} preserveCase>
+                      {entry.title}
+                    </Text>
+                    {entry.detail ? (
+                      <Text style={styles.rowDetail} preserveCase>
+                        {entry.detail}
+                      </Text>
+                    ) : null}
                   </View>
                 </View>
               ))}
@@ -282,7 +289,7 @@ function dotStyle(kind: string) {
     case "reminder":
       return { backgroundColor: colors.warning };
     case "expense":
-      return { backgroundColor: "#F5C56B" };
+      return { backgroundColor: colors.warning };
     case "message":
       return { backgroundColor: colors.danger };
     default:

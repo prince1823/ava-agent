@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Animated, Modal, Pressable, StyleSheet, View } from "react-native";
+import { Text } from "./Text";
 import { colors, radius, spacing } from "../theme";
 import { toolConfirmationCopy, toolIcon } from "../tools/presentation";
 import { useAgentStore } from "../store/agentStore";

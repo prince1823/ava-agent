@@ -7,6 +7,9 @@ export type ServerEvent =
   | { type: "done" }
   | { type: "error"; message: string };
 
+/** Composer mode selector — steers the agent loop for this one turn, like Claude's Plan/Agent toggle. */
+export type AgentMode = "chat" | "plan" | "promise";
+
 export type ClientMessage =
   | {
       type: "user_message";
@@ -19,6 +22,9 @@ export type ClientMessage =
       profile?: unknown;
       commitments?: unknown;
       regenerate?: boolean;
+      mode?: AgentMode;
+      /** A data: URI (screenshot/photo) attached to this turn for the vision model to read. */
+      image?: string;
     }
   | { type: "cancel" }
   | { type: "tool_result"; callId: string; result: unknown };
@@ -40,4 +46,5 @@ export interface ChatMessage {
   text: string;
   toolCalls: ToolCall[];
   streaming?: boolean;
+  image?: string;
 }

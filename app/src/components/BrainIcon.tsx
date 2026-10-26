@@ -40,6 +40,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: colors.accentSoft,
     borderWidth: 1,
-    borderColor: "#38E2A444",
+    borderColor: "#B9A6FF44",
   },
 });

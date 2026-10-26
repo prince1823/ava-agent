@@ -66,6 +66,12 @@
           "contactsPermission": "Ava needs contacts access to find people you ask it to message."
         }
       ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Ava needs photo access so you can share a screenshot or photo for it to read."
+        }
+      ],
       "expo-sharing",
       [
         "expo-local-authentication",
@@ -79,11 +85,12 @@
           "image": "./assets/splash-empty.png",
           "imageWidth": 100,
           "resizeMode": "contain",
-          "backgroundColor": "#0A1612"
+          "backgroundColor": "#0A0812"
         }
       ],
-      "./plugins/withAvaSigning"
+      "./plugins/withAvaSigning",
+      "expo-font"
     ],
-    "backgroundColor": "#0A1612"
+    "backgroundColor": "#0A0812"
   }
 }

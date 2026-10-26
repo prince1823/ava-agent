@@ -4,7 +4,7 @@ import { executeTool, type ToolName } from "../tools";
 import { agentWsUrl } from "../config";
 import { loadProfile, scheduleProfileRefresh } from "../memory/profile";
 import { cloudMinimised, recordOutbound } from "../privacy/ledger";
-import type { ChatMessage, ClientMessage, ServerEvent, ToolCall } from "../types/agent";
+import type { AgentMode, ChatMessage, ClientMessage, ServerEvent, ToolCall } from "../types/agent";
 import { simulatePlan, type SimulatedAction, type SimulationResult } from "../tools/simulate";
 import {
   createConversation,
@@ -69,8 +69,11 @@ interface AgentState {
   suggestions: string[];
   /** Most recent simulate_plan result, surfaced by the Simulator screen. */
   lastSimulation: SimulationResult | null;
+  /** Composer mode selector — steers the next turn (chat/plan/promise), like Claude's mode toggle. */
+  mode: AgentMode;
+  setMode: (mode: AgentMode) => void;
   connect: () => void;
-  sendMessage: (text: string, opts?: { regenerate?: boolean }) => void;
+  sendMessage: (text: string, opts?: { regenerate?: boolean; image?: string }) => void;
   stopGeneration: () => void;
   regenerateLast: () => void;
   confirmPending: (approve: boolean) => void;
@@ -91,6 +94,24 @@ let activeAssistantId: string | null = null;
 // Conversations the current socket already holds history for. A new socket (or a chat opened for the
 // first time on it) is seeded with the recent messages so Ava keeps the context.
 const seededConversations = new Set<string>();
+
+// Android (and iOS, less aggressively) kills the TCP connection once the app is
+// backgrounded/locked for a while — the socket's onclose fires, but nothing
+// reconnected it before, so the send button looked "stuck" until a full app
+// restart. Reconnect automatically with backoff, and also eagerly on app
+// foreground (see _layout.tsx) so resuming from lock feels instant.
+let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+let reconnectAttempt = 0;
+
+function scheduleReconnect(connect: () => void) {
+  if (reconnectTimer) return;
+  const delay = Math.min(30_000, 1000 * 2 ** reconnectAttempt);
+  reconnectAttempt += 1;
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null;
+    connect();
+  }, delay);
+}
 
 function uid(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -131,6 +152,8 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   conversations: [],
   suggestions: [],
   lastSimulation: null,
+  mode: "chat",
+  setMode: (mode) => set({ mode }),
 
   connect: () => {
     const existing = get().socket;
@@ -138,12 +161,25 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       return;
     }
 
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
+
     const ws = new WebSocket(agentWsUrl());
     seededConversations.clear();
     set({ status: "connecting" });
 
-    ws.onopen = () => set({ status: "open" });
-    ws.onclose = () => set({ status: "closed" });
+    ws.onopen = () => {
+      reconnectAttempt = 0;
+      set({ status: "open" });
+    };
+    ws.onclose = () => {
+      // A turn that was mid-flight on the dead socket will never get its "done"/"error"
+      // event now — clear it so the UI (and the send button) doesn't look frozen.
+      set({ status: "closed", socket: null, isStreaming: false, pendingConfirmation: null });
+      scheduleReconnect(() => get().connect());
+    };
     ws.onerror = () => set({ status: "error" });
     ws.onmessage = (event) => handleServerEvent(JSON.parse(event.data), set, get);
 
@@ -196,10 +232,11 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     }
   },
 
-  sendMessage: (text: string, opts?: { regenerate?: boolean }) => {
+  sendMessage: (text: string, opts?: { regenerate?: boolean; image?: string }) => {
     const ws = get().socket;
     if (!ws || ws.readyState !== WebSocket.OPEN || get().isStreaming) return;
     const regenerate = !!opts?.regenerate;
+    const image = opts?.image;
 
     let conversationId = get().conversationId;
     if (!conversationId) {
@@ -232,7 +269,10 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     if (regenerate) {
       set((s) => ({ messages: [...s.messages, assistantMessage], isStreaming: true, suggestions: [] }));
     } else {
-      const userMessage: ChatMessage = { id: uid(), role: "user", text, toolCalls: [] };
+      // The image attachment is session-only (not persisted to SQLite) — it's
+      // re-sent to the model for this turn but doesn't bloat local storage or
+      // get reloaded when the conversation is reopened later.
+      const userMessage: ChatMessage = { id: uid(), role: "user", text, toolCalls: [], image };
       saveChatMessage(userMessage.id, conversationId, "user", text);
       set((s) => ({
         messages: [...s.messages, userMessage, assistantMessage],
@@ -253,12 +293,15 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       profile: loadProfile(),
       commitments: listCommitments("open"),
       regenerate,
+      mode: get().mode,
+      image,
     };
     recordOutbound({
       kind: "agent_turn",
       destination: agentWsUrl(),
       purpose: "Your message and recent context, sent to the model",
-      payload,
+      // The ledger shows what was sent without bloating itself with a full base64 image.
+      payload: image ? { ...payload, image: `[image attached, ${Math.round(image.length / 1024)}KB]` } : payload,
     });
     ws.send(JSON.stringify(payload));
   },

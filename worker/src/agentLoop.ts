@@ -15,6 +15,11 @@ Tool rules:
 - CRITICAL: every datetime you pass as a tool argument (start, end, fireAt, etc.) must be a LOCAL wall-clock ISO string with NO "Z" suffix and NO UTC offset — e.g. "2026-01-20T15:00:00" for 3pm, never "2026-01-20T15:00:00Z" or "...+00:00". The string's hour must literally equal the hour the user means in their own timezone. Never convert to UTC yourself — the device handles that.
 - When you confirm a time back to the user, state the same local hour you put in the tool argument.
 - After successfully creating a calendar event that doesn't already have an obvious reminder tied to it, you may briefly offer (as a question, once, one short sentence) to also set a reminder before it.
+- When scheduling a meeting WITH another person (not a solo reminder like "gym" or "dentist"), write it the way a person would send a real invite: a specific, descriptive title naming what it's about (never "Meeting" or "Call"), and a short one-to-two-sentence agenda in notes. If you have that person's email (from find_contact, memory, or the user telling you), pass it as attendeeEmail so they're actually invited — not just a private entry on the user's own calendar. If you don't have their email, ask for it rather than skipping the invite silently, unless the user clearly just wants a personal reminder. After the tool returns, check its "invited" field: if true, tell the user the invite was sent; if false (even though an email was given), say the event was created but the invite may not have gone out — don't claim it was sent if the tool didn't confirm it.
+
+Photos and screenshots:
+- The user can attach a photo or screenshot to a message — a flight confirmation, an event poster, a WhatsApp message with a date in it, a receipt. When one is attached, actually read it and act on what it says the same way you would if the user had typed the details: resolve the date/time/place/person from the image (using the current local date/time context to resolve relative or partial dates like "Fri" or "7pm") and call the matching tool — create_calendar_event for an event/invite/ticket, schedule_reminder for a deadline or reminder, create_commitment for a promise or task, add_expense for a receipt. Don't just describe the image back to the user unless they asked you to, or unless it genuinely has nothing actionable in it (then say so briefly).
+- If the image is ambiguous or missing a required field (e.g. no end time), make a reasonable assumption (e.g. a 1-hour event) rather than refusing, but say what you assumed so the user can correct it before confirming.
 
 Promises and what-ifs:
 - When the user states an intention or promise ("I need to…", "I promised…", "don't let me forget…"), call create_commitment with the resolved due date. Do not also schedule a notification unless they asked for one.
@@ -70,6 +75,20 @@ function commitmentsBlock(commitments: unknown): string {
 }
 
 /**
+ * The composer's mode selector (chat/plan/promise) — the user explicitly picked this
+ * mode before sending, so it's a real steer for THIS turn, not a guess from wording.
+ */
+function modeBlock(mode: string | undefined): string {
+  if (mode === "plan") {
+    return `\n\nMODE: Plan. The user selected "Plan" before sending this message — treat whatever they describe as a scenario to dry-run, even if it isn't phrased as a question. Call simulate_plan to show the timeline/impact/conflicts rather than taking any real action, unless they are clearly asking a plain question that needs no simulation (e.g. "what did I spend last week").`;
+  }
+  if (mode === "promise") {
+    return `\n\nMODE: Promise. The user selected "Promise" before sending this message — treat it as something to track with create_commitment (resolving any due date they mention), not as a request to execute right now, unless they are clearly just asking to see or manage existing promises (then use list_commitments/complete_commitment).`;
+  }
+  return "";
+}
+
+/**
  * Runs the agentic loop for one user turn. Tool calls targeting the device are
  * yielded as events and this function SUSPENDS (awaiting `awaitToolResult`)
  * until the client reports the result back over the same socket.
@@ -85,6 +104,7 @@ export async function* runAgentTurn(
     model: string;
     profile?: unknown;
     commitments?: unknown;
+    mode?: string;
     shouldStop?: () => boolean;
   }
 ): AsyncGenerator<AgentEvent> {
@@ -99,7 +119,7 @@ export async function* runAgentTurn(
 
   const system: ChatCompletionMessageParam = {
     role: "system",
-    content: SYSTEM_PROMPT + profileBlock(opts.profile) + commitmentsBlock(opts.commitments),
+    content: SYSTEM_PROMPT + profileBlock(opts.profile) + commitmentsBlock(opts.commitments) + modeBlock(opts.mode),
   };
   const stopped = () => opts.shouldStop?.() ?? false;
 

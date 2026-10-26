@@ -52,6 +52,7 @@ export async function executeTool(name: ToolName, args: Record<string, any>): Pr
         end: args.end,
         notes: args.notes,
         location: args.location,
+        attendeeEmail: args.attendeeEmail,
       });
       logAction("calendar_event", created.id, `Calendar event "${created.title}"`);
       return created;

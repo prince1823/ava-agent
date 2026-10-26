@@ -17,6 +17,9 @@ type ClientMessage =
       profile?: unknown;
       commitments?: unknown;
       regenerate?: boolean;
+      mode?: "chat" | "plan" | "promise";
+      /** A data: URI (screenshot/photo) attached to this turn for the vision model to read. */
+      image?: string;
     }
   | { type: "tool_result"; callId: string; result: unknown }
   | { type: "cancel" };
@@ -139,11 +142,18 @@ export class AvaAgent extends Agent<Env, unknown> {
         if (lastUser >= 0) history.length = lastUser;
       }
 
+      const textContent = `[current local date/time: ${msg.clientDate}, timezone: ${msg.timeZone}${
+        msg.upcoming ? `, upcoming days: ${msg.upcoming}` : ""
+      }] ${msg.text}`;
+
       history.push({
         role: "user",
-        content: `[current local date/time: ${msg.clientDate}, timezone: ${msg.timeZone}${
-          msg.upcoming ? `, upcoming days: ${msg.upcoming}` : ""
-        }] ${msg.text}`,
+        content: msg.image
+          ? [
+              { type: "text", text: textContent },
+              { type: "image_url", image_url: { url: msg.image } },
+            ]
+          : textContent,
       });
 
       const awaitToolResult = (callId: string) =>
@@ -160,6 +170,7 @@ export class AvaAgent extends Agent<Env, unknown> {
           model,
           profile: msg.profile,
           commitments: msg.commitments,
+          mode: msg.mode,
           shouldStop: () => this.stopRequested,
         })) {
           if (event.type === "delta") reply += event.text;

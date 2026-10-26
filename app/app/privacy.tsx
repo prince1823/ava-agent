@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from "react-native";
+import { Text } from "../src/components/Text";
 import { Stack, useFocusEffect } from "expo-router";
 import { colors, radius, spacing } from "../src/theme";
 import { BackgroundArt } from "../src/components/BackgroundArt";

@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from "react";
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, FlatList, Pressable, StyleSheet, View } from "react-native";
+import { Text } from "../src/components/Text";
 import { Stack, useFocusEffect } from "expo-router";
 import { colors, radius, spacing } from "../src/theme";
 import { listActionLog, type ActionLogRow, type UndoableActionType } from "../src/db/db";

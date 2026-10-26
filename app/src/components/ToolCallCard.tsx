@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import { Animated, Easing, StyleSheet, Text, View } from "react-native";
+import { Animated, Easing, StyleSheet, View } from "react-native";
+import { Text } from "./Text";
 import { colors, radius, spacing } from "../theme";
 import { toolIcon, toolLabel } from "../tools/presentation";
 import type { ToolCall } from "../types/agent";

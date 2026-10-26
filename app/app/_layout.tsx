@@ -3,10 +3,12 @@ import { AppState, type AppStateStatus } from "react-native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useFonts } from "@expo-google-fonts/space-grotesk";
 import { KeyboardProvider } from "../src/components/Keyboard";
 import { initDb, getSetting } from "../src/db/db";
 import { useAgentStore } from "../src/store/agentStore";
 import { colors } from "../src/theme";
+import { fontsToLoad } from "../src/theme/font";
 import { authenticate, biometricsAvailable } from "../src/auth/biometrics";
 import { LockScreen } from "../src/components/LockScreen";
 import { AnimatedSplash } from "../src/components/AnimatedSplash";
@@ -23,6 +25,7 @@ export default function RootLayout() {
   const [dbReady, setDbReady] = useState(false);
   const [splashDone, setSplashDone] = useState(false);
   const prompted = useRef(false);
+  const [fontsLoaded] = useFonts(fontsToLoad);
 
   useEffect(() => {
     initDb();
@@ -43,15 +46,19 @@ export default function RootLayout() {
   }, [connect]);
 
   useEffect(() => {
-    if (!biometricsOn) return;
     const sub = AppState.addEventListener("change", (next: AppStateStatus) => {
-      if (appState.current?.match(/active/) && next.match(/inactive|background/)) {
+      if (appState.current?.match(/active/) && next.match(/inactive|background/) && biometricsOn) {
         setLocked(true);
+      }
+      // The socket dies while backgrounded (OS kills the TCP connection); reconnect
+      // right away on resume instead of waiting for the chat screen to notice.
+      if (appState.current?.match(/inactive|background/) && next === "active") {
+        connect();
       }
       appState.current = next;
     });
     return () => sub.remove();
-  }, [biometricsOn]);
+  }, [biometricsOn, connect]);
 
   // Ask for biometrics only after the intro has faded, so the prompt never sits on top of it.
   useEffect(() => {
@@ -90,7 +97,7 @@ export default function RootLayout() {
         )}
         {!splashDone && (
           <AnimatedSplash
-            ready={dbReady}
+            ready={dbReady && fontsLoaded}
             onDone={() => setSplashDone(true)}
           />
         )}

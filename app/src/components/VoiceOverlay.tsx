@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import { Animated, Easing, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Animated, Easing, Modal, Pressable, StyleSheet, View } from "react-native";
+import { Text } from "./Text";
 import Svg, { Defs, RadialGradient, Rect, Stop } from "react-native-svg";
 import { colors, radius, spacing } from "../theme";
 
@@ -57,7 +58,7 @@ export function VoiceOverlay({
               <Defs>
                 <RadialGradient id="orbGrad" cx="40%" cy="35%" r="75%">
                   <Stop offset="0%" stopColor="#B8FFE6" stopOpacity={1} />
-                  <Stop offset="55%" stopColor="#38E2A4" stopOpacity={1} />
+                  <Stop offset="55%" stopColor="#B9A6FF" stopOpacity={1} />
                   <Stop offset="100%" stopColor="#0E7A58" stopOpacity={1} />
                 </RadialGradient>
               </Defs>
