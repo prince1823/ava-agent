@@ -17,7 +17,7 @@ type ClientMessage =
       profile?: unknown;
       commitments?: unknown;
       regenerate?: boolean;
-      mode?: "chat" | "plan" | "promise";
+      mode?: "chat" | "schedule" | "promise" | "simulate" | "travel";
       /** A data: URI (screenshot/photo) attached to this turn for the vision model to read. */
       image?: string;
     }

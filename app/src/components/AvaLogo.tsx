@@ -42,5 +42,5 @@ export function AvaBrand({ status }: { status?: string }) {
 const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 10 },
   dot: { position: "absolute", right: -2, bottom: -2, width: 10, height: 10, borderRadius: 5, borderWidth: 2, borderColor: colors.bg },
-  word: { color: colors.textPrimary, fontSize: 19, fontWeight: "800", letterSpacing: 5 },
+  word: { color: colors.textPrimary, fontSize: 17, fontWeight: "800", letterSpacing: 1 },
 });

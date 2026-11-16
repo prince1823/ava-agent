@@ -16,6 +16,7 @@ const LABELS: Record<string, string> = {
   list_commitments: "Checking your commitments",
   complete_commitment: "Completing a commitment",
   simulate_plan: "Simulating the plan",
+  plan_trip: "Planning your trip",
 };
 
 const ICONS: Record<string, string> = {
@@ -36,6 +37,7 @@ const ICONS: Record<string, string> = {
   list_commitments: "📋",
   complete_commitment: "✅",
   simulate_plan: "🔮",
+  plan_trip: "🧳",
 };
 
 export function toolLabel(name: string): string {

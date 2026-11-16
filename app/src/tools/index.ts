@@ -35,7 +35,8 @@ export type ToolName =
   | "create_commitment"
   | "list_commitments"
   | "complete_commitment"
-  | "simulate_plan";
+  | "simulate_plan"
+  | "plan_trip";
 
 export async function executeTool(name: ToolName, args: Record<string, any>): Promise<unknown> {
   switch (name) {
@@ -122,6 +123,11 @@ export async function executeTool(name: ToolName, args: Record<string, any>): Pr
         horizon: args.horizon === "week" ? "week" : "day",
         start: args.start,
       });
+
+    // plan_trip has no real-world effect — the itinerary IS the args, the
+    // client just renders them as cards. Echo back so the tool call resolves.
+    case "plan_trip":
+      return { ok: true };
 
     default:
       throw new Error(`Unknown tool: ${name}`);

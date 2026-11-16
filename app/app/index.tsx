@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Animated, Easing, FlatList, Pressable, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "../src/components/Text";
 import { KeyboardStickyView } from "../src/components/Keyboard";
 import { Stack, router, useLocalSearchParams } from "expo-router";
@@ -42,6 +43,7 @@ export default function ChatScreen() {
   const lastCount = useRef(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const swap = useRef(new Animated.Value(1)).current;
+  const insets = useSafeAreaInsets();
 
   // Screens like Promises and Simulator hand off a prompt through route params.
   // Wait for the socket, then send it once per distinct prompt.
@@ -64,23 +66,23 @@ export default function ChatScreen() {
     <View style={styles.flex}>
       <BackgroundArt />
 
-      <Stack.Screen
-        options={{
-          headerTitle: () => <AvaBrand status={status} />,
-          headerTitleAlign: "center",
-          headerLeft: () => (
-            <Pressable style={styles.menuButton} onPress={() => setSidebarOpen(true)}>
-              <Text style={styles.menuIcon}>☰</Text>
-            </Pressable>
-          ),
-          headerRight: () => (
-            <View style={{ marginRight: spacing(3), flexDirection: "row", alignItems: "center", gap: spacing(2) }}>
-              <BrainButton onPress={() => router.push("/memory")} />
-              <NewChatButton onPress={startNewChat} />
-            </View>
-          ),
-        }}
-      />
+      <Stack.Screen options={{ headerShown: false }} />
+
+      {/* Custom header instead of the native Stack one — the native title slot on
+          Android clips a custom title component's content ("Ava" renders as "Av")
+          regardless of alignment settings, so we lay this out by hand instead. */}
+      <View style={[styles.header, { paddingTop: insets.top + spacing(2) }]}>
+        <Pressable style={styles.menuButton} onPress={() => setSidebarOpen(true)}>
+          <Text style={styles.menuIcon}>☰</Text>
+        </Pressable>
+        <View style={styles.headerBrand}>
+          <AvaBrand status={status} />
+        </View>
+        <View style={styles.headerRight}>
+          <BrainButton onPress={() => router.push("/memory")} />
+          <NewChatButton onPress={startNewChat} />
+        </View>
+      </View>
 
       <Animated.View
         style={[
@@ -161,6 +163,15 @@ const styles = StyleSheet.create({
   insightLabel: { color: colors.accent, fontSize: 10, fontWeight: "700", letterSpacing: 1.2 },
   insightText: { color: colors.textPrimary, fontSize: 13, lineHeight: 18 },
   suggestions: { gap: spacing(3), marginTop: spacing(2) },
-  menuButton: { paddingHorizontal: spacing(3), paddingVertical: spacing(2) },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: spacing(3),
+    paddingBottom: spacing(2),
+    backgroundColor: colors.bg,
+  },
+  menuButton: { paddingHorizontal: spacing(2), paddingVertical: spacing(2) },
   menuIcon: { fontSize: 18, color: colors.textPrimary },
+  headerBrand: { flex: 1, paddingLeft: spacing(2) },
+  headerRight: { flexDirection: "row", alignItems: "center", gap: spacing(2) },
 });

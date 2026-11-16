@@ -159,7 +159,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
 
   find_contact: tool(
     "find_contact",
-    "Search the user's device contacts by name. Use this before send_text_message to find a contact's phone number.",
+    "Search the user's device contacts by name to find their phone number or email. Only call this when the user hasn't already given you the contact detail you need (e.g. they said a name but not an email/number) — if they already gave you an email or phone number directly, use it as given instead of looking it up.",
     {
       type: "object",
       properties: {
@@ -321,6 +321,47 @@ export const TOOLS: Record<string, ToolDefinition> = {
         },
       },
       required: ["actions"],
+    },
+    "client",
+    false
+  ),
+
+  plan_trip: tool(
+    "plan_trip",
+    "Build and show a visual, day-by-day trip itinerary as scrollable cards with real photos of each place, food and cafe. Call this once you know the destination, how many days, and ideally a budget — if the user hasn't given those, ask first rather than guessing. Does not book anything; it only proposes a plan for the user to react to.",
+    {
+      type: "object",
+      properties: {
+        destination: { type: "string", description: "City/region, e.g. 'Varanasi'" },
+        days: { type: "integer", description: "Trip length in days" },
+        budgetINR: { type: "number", description: "Total budget in INR, if the user gave one" },
+        summary: {
+          type: "string",
+          description: "One or two sentence overview of the trip and how it fits the budget.",
+        },
+        stops: {
+          type: "array",
+          description:
+            "Every place, food, and cafe to visit, in visiting order across the whole trip. Include 2-4 places plus 1-2 food items and 1 cafe per day — real, specific, well-known names (never generic like 'local market').",
+          items: {
+            type: "object",
+            properties: {
+              day: { type: "integer", description: "Which day of the trip (1-indexed)" },
+              type: { type: "string", enum: ["place", "food", "cafe"] },
+              name: { type: "string", description: "Specific real name, e.g. 'Dashashwamedh Ghat' or 'Banarasi Paan'" },
+              note: { type: "string", description: "One short sentence: why it's worth it, or best time to go." },
+              estCostINR: { type: "number", description: "Rough cost estimate in INR for this stop, if relevant." },
+              imageQuery: {
+                type: "string",
+                description:
+                  "Best possible Wikipedia search term to find a real photo of this exact thing, e.g. 'Dashashwamedh Ghat Varanasi' not just 'ghat'.",
+              },
+            },
+            required: ["day", "type", "name", "imageQuery"],
+          },
+        },
+      },
+      required: ["destination", "days", "summary", "stops"],
     },
     "client",
     false

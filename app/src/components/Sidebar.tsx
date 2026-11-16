@@ -96,36 +96,6 @@ export function Sidebar({ visible, onClose }: { visible: boolean; onClose: () =>
             style={styles.footerButton}
             onPress={() => {
               onClose();
-              router.push("/memory");
-            }}
-          >
-            <Text style={styles.footerIcon}>🧠</Text>
-            <Text style={styles.footerText}>Memory</Text>
-          </Pressable>
-          <Pressable
-            style={styles.footerButton}
-            onPress={() => {
-              onClose();
-              router.push("/commitments");
-            }}
-          >
-            <Text style={styles.footerIcon}>🤝</Text>
-            <Text style={styles.footerText}>Promises</Text>
-          </Pressable>
-          <Pressable
-            style={styles.footerButton}
-            onPress={() => {
-              onClose();
-              router.push("/simulator");
-            }}
-          >
-            <Text style={styles.footerIcon}>🔮</Text>
-            <Text style={styles.footerText}>Simulate</Text>
-          </Pressable>
-          <Pressable
-            style={styles.footerButton}
-            onPress={() => {
-              onClose();
               router.push("/history");
             }}
           >
@@ -162,7 +132,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing(4),
   },
   brandRow: { flexDirection: "row", alignItems: "center", gap: spacing(2.5), marginBottom: spacing(4) },
-  heading: { fontSize: 18, fontWeight: "800", color: colors.textPrimary, letterSpacing: 3 },
+  heading: { fontSize: 18, fontWeight: "800", color: colors.textPrimary, letterSpacing: 0.5 },
   newChat: {
     backgroundColor: colors.accentSoft,
     borderRadius: radius.md,

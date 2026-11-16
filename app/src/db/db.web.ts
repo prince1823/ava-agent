@@ -260,16 +260,31 @@ export interface ChatMessageRow {
   role: "user" | "assistant";
   text: string;
   created_at: string;
+  image: string | null;
 }
 
-export function saveChatMessage(id: string, conversationId: string, role: "user" | "assistant", text: string) {
+export function saveChatMessage(
+  id: string,
+  conversationId: string,
+  role: "user" | "assistant",
+  text: string,
+  image?: string | null
+) {
   const rows = read<ChatMessageRow[]>("chatMessages", []);
   const existing = rows.find((r) => r.id === id);
   if (existing) {
     existing.text = text;
     existing.role = role;
+    if (image !== undefined) existing.image = image ?? null;
   } else {
-    rows.push({ id, conversation_id: conversationId, role, text, created_at: new Date().toISOString() });
+    rows.push({
+      id,
+      conversation_id: conversationId,
+      role,
+      text,
+      created_at: new Date().toISOString(),
+      image: image ?? null,
+    });
   }
   write("chatMessages", rows);
 }

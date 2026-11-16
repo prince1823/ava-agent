@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Alert, Animated, Image, Pressable, StyleSheet, View } from "react-native";
+import { Alert, Animated, Image, Modal, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Text, TextInput } from "./Text";
 import * as Haptics from "expo-haptics";
 import {
@@ -14,10 +14,44 @@ import { VoiceOverlay } from "./VoiceOverlay";
 import { pickImage } from "../tools/imagePicker";
 import type { AgentMode } from "../types/agent";
 
-const MODES: Array<{ key: AgentMode; label: string; hint: string }> = [
-  { key: "chat", label: "chat", hint: "Just talk to Ava" },
-  { key: "plan", label: "plan", hint: "Dry-run before doing anything" },
-  { key: "promise", label: "promise", hint: "Track something you said you'd do" },
+// Tap the mode button (left of the input) to open a picker listing these.
+// `examples` are shown as try-this chips above the input whenever this mode is active.
+const MODES: Array<{ key: AgentMode; label: string; hint: string; icon: string; examples: string[] }> = [
+  {
+    key: "chat",
+    label: "chat",
+    hint: "Just talk to Ava",
+    icon: "💬",
+    examples: ["What's on my calendar today?", "Remember that I'm vegetarian", "How much did I spend this week?"],
+  },
+  {
+    key: "schedule",
+    label: "schedule",
+    hint: "Book a calendar event or reminder",
+    icon: "📅",
+    examples: ["Book a dentist appointment Tuesday at 4pm", "Remind me to call mom tomorrow at 7pm"],
+  },
+  {
+    key: "promise",
+    label: "promise",
+    hint: "Track something you said you'd do",
+    icon: "🤝",
+    examples: ["I promised Priya I'd send the invoice by Friday", "Don't let me forget to renew my passport"],
+  },
+  {
+    key: "simulate",
+    label: "simulate",
+    hint: "Dry-run a plan before doing anything",
+    icon: "🔮",
+    examples: ["What if I skip the gym tonight and order pizza instead?", "What happens if I take a cab instead of the bus?"],
+  },
+  {
+    key: "travel",
+    label: "travel",
+    hint: "Plan a trip with a day-by-day itinerary",
+    icon: "🧳",
+    examples: ["Plan my Goa trip under ₹15,000", "I want to visit Manali for 4 days"],
+  },
 ];
 
 export function Composer() {
@@ -32,6 +66,7 @@ export function Composer() {
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [image, setImage] = useState<string | null>(null);
   const [pickingImage, setPickingImage] = useState(false);
+  const [modePickerOpen, setModePickerOpen] = useState(false);
   const level = useRef(new Animated.Value(0)).current;
 
   useSpeechRecognitionEvent("start", () => setListening(true));
@@ -54,6 +89,13 @@ export function Composer() {
     sendMessage(trimmed || "Here's a screenshot — see what you can do with it.", image ? { image } : undefined);
     setText("");
     setImage(null);
+  };
+
+  const activeMode = MODES.find((m) => m.key === mode) ?? MODES[0];
+  const pickMode = (key: AgentMode) => {
+    Haptics.selectionAsync().catch(() => {});
+    setMode(key);
+    setModePickerOpen(false);
   };
 
   const handlePickImage = async () => {
@@ -121,18 +163,47 @@ export function Composer() {
         onCancel={cancelVoice}
         onSend={sendVoice}
       />
-      <View style={styles.modeRow}>
-        {MODES.map((m) => (
-          <Pressable
-            key={m.key}
-            style={[styles.modePill, mode === m.key && styles.modePillActive]}
-            onPress={() => setMode(m.key)}
-            accessibilityLabel={m.hint}
-          >
-            <Text style={[styles.modeText, mode === m.key && styles.modeTextActive]}>{m.label}</Text>
-          </Pressable>
-        ))}
-      </View>
+      <Modal transparent visible={modePickerOpen} animationType="fade" onRequestClose={() => setModePickerOpen(false)}>
+        <View style={styles.modeOverlay}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setModePickerOpen(false)} />
+          <View style={styles.modeSheet}>
+            <View style={styles.modeSheetHandle} />
+            <Text style={styles.modeSheetTitle}>mode</Text>
+            {MODES.map((m) => (
+              <Pressable
+                key={m.key}
+                style={[styles.modeOption, m.key === mode && styles.modeOptionActive]}
+                onPress={() => pickMode(m.key)}
+              >
+                <Text style={styles.modeOptionIcon}>{m.icon}</Text>
+                <View style={styles.modeOptionText}>
+                  <Text style={[styles.modeOptionLabel, m.key === mode && styles.modeTextActive]}>{m.label}</Text>
+                  <Text style={styles.modeOptionHint} preserveCase>
+                    {m.hint}
+                  </Text>
+                </View>
+                {m.key === mode ? <Text style={styles.modeOptionCheck}>✓</Text> : null}
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      </Modal>
+      {!text.trim() && !image && activeMode.examples.length > 0 ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.examplesRow}
+          keyboardShouldPersistTaps="handled"
+        >
+          {activeMode.examples.map((example) => (
+            <Pressable key={example} style={styles.exampleChip} onPress={() => setText(example)}>
+              <Text style={styles.exampleChipText} numberOfLines={1} preserveCase>
+                {example}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      ) : null}
       {image && (
         <View style={styles.previewRow}>
           <View style={styles.previewChip}>
@@ -145,6 +216,13 @@ export function Composer() {
         </View>
       )}
       <View style={styles.wrap}>
+      <Pressable
+        style={[styles.modeButton, mode !== "chat" && styles.modeButtonActive]}
+        onPress={() => setModePickerOpen(true)}
+        accessibilityLabel={`Mode: ${activeMode.label}. Tap to change.`}
+      >
+        <Text style={styles.modeButtonIcon}>{activeMode.icon}</Text>
+      </Pressable>
       <View style={styles.pill}>
         <TextInput
           style={styles.input}
@@ -189,32 +267,60 @@ const styles = StyleSheet.create({
   outer: {
     backgroundColor: colors.bg,
   },
-  modeRow: {
-    flexDirection: "row",
-    gap: spacing(1.5),
-    paddingHorizontal: spacing(4),
-    paddingTop: spacing(2),
-  },
-  modePill: {
+  modeButton: {
+    width: 44,
+    height: 44,
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surfaceAlt,
-    paddingHorizontal: spacing(3),
-    paddingVertical: spacing(1),
+    alignItems: "center",
+    justifyContent: "center",
   },
-  modePillActive: {
+  modeButtonActive: {
     backgroundColor: colors.accentSoft,
     borderColor: colors.accent,
   },
-  modeText: {
-    color: colors.textSecondary,
-    fontSize: 11.5,
-    fontWeight: "600",
-  },
+  modeButtonIcon: { fontSize: 18 },
   modeTextActive: {
     color: colors.accent,
   },
+  modeOverlay: { flex: 1, backgroundColor: "#00000088", justifyContent: "flex-end" },
+  modeSheet: {
+    backgroundColor: colors.bgElevated,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    borderTopWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing(5),
+    paddingTop: spacing(3),
+    paddingBottom: spacing(8),
+    alignItems: "center",
+  },
+  modeSheetHandle: { width: 36, height: 4, borderRadius: 2, backgroundColor: colors.border, marginBottom: spacing(3) },
+  modeSheetTitle: {
+    alignSelf: "flex-start",
+    color: colors.textFaint,
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 1,
+    marginBottom: spacing(2),
+  },
+  modeOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing(3),
+    width: "100%",
+    paddingVertical: spacing(3),
+    paddingHorizontal: spacing(2),
+    borderRadius: radius.md,
+  },
+  modeOptionActive: { backgroundColor: colors.accentSoft },
+  modeOptionIcon: { fontSize: 20, width: 28, textAlign: "center" },
+  modeOptionText: { flex: 1, gap: 1 },
+  modeOptionLabel: { color: colors.textPrimary, fontSize: 14, fontWeight: "700" },
+  modeOptionHint: { color: colors.textSecondary, fontSize: 11.5 },
+  modeOptionCheck: { color: colors.accent, fontSize: 16, fontWeight: "700" },
   wrap: {
     flexDirection: "row",
     alignItems: "flex-end",
@@ -248,6 +354,25 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   micActive: { backgroundColor: colors.accent },
+  examplesRow: {
+    gap: spacing(2),
+    paddingHorizontal: spacing(4),
+    paddingTop: spacing(2),
+  },
+  exampleChip: {
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing(3),
+    paddingVertical: spacing(1.5),
+    maxWidth: 260,
+  },
+  exampleChipText: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: "500",
+  },
   previewRow: {
     paddingHorizontal: spacing(4),
     paddingTop: spacing(2),

@@ -214,6 +214,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       role: r.role,
       text: r.text,
       toolCalls: [],
+      image: r.image ?? undefined,
     }));
     activeAssistantId = null;
     set({ conversationId: id, messages });
@@ -269,11 +270,8 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     if (regenerate) {
       set((s) => ({ messages: [...s.messages, assistantMessage], isStreaming: true, suggestions: [] }));
     } else {
-      // The image attachment is session-only (not persisted to SQLite) — it's
-      // re-sent to the model for this turn but doesn't bloat local storage or
-      // get reloaded when the conversation is reopened later.
       const userMessage: ChatMessage = { id: uid(), role: "user", text, toolCalls: [], image };
-      saveChatMessage(userMessage.id, conversationId, "user", text);
+      saveChatMessage(userMessage.id, conversationId, "user", text, image);
       set((s) => ({
         messages: [...s.messages, userMessage, assistantMessage],
         isStreaming: true,

@@ -15,7 +15,7 @@
       "package": "com.avaagent.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundColor": "#0A1612",
+        "backgroundColor": "#0A0812",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,

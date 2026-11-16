@@ -62,6 +62,7 @@ export function initDb() {
   `);
 
   migrateActionLogReversedColumn();
+  migrateChatMessagesImageColumn();
 
   const count = db.getFirstSync<{ c: number }>("SELECT COUNT(*) as c FROM expenses");
   if (count?.c === 0) {
@@ -73,6 +74,13 @@ function migrateActionLogReversedColumn() {
   const cols = db.getAllSync<{ name: string }>("PRAGMA table_info(action_log)");
   if (!cols.some((c) => c.name === "reversed")) {
     db.execSync("ALTER TABLE action_log ADD COLUMN reversed INTEGER NOT NULL DEFAULT 0");
+  }
+}
+
+function migrateChatMessagesImageColumn() {
+  const cols = db.getAllSync<{ name: string }>("PRAGMA table_info(chat_messages)");
+  if (!cols.some((c) => c.name === "image")) {
+    db.execSync("ALTER TABLE chat_messages ADD COLUMN image TEXT");
   }
 }
 
@@ -283,16 +291,24 @@ export interface ChatMessageRow {
   role: "user" | "assistant";
   text: string;
   created_at: string;
+  image: string | null;
 }
 
-export function saveChatMessage(id: string, conversationId: string, role: "user" | "assistant", text: string) {
+export function saveChatMessage(
+  id: string,
+  conversationId: string,
+  role: "user" | "assistant",
+  text: string,
+  image?: string | null
+) {
   db.runSync(
-    "INSERT OR REPLACE INTO chat_messages (id, conversation_id, role, text, created_at) VALUES (?, ?, ?, ?, ?)",
+    "INSERT OR REPLACE INTO chat_messages (id, conversation_id, role, text, created_at, image) VALUES (?, ?, ?, ?, ?, ?)",
     id,
     conversationId,
     role,
     text,
-    new Date().toISOString()
+    new Date().toISOString(),
+    image ?? null
   );
 }
 

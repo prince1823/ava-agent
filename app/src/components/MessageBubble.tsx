@@ -11,6 +11,7 @@ import { CheckIcon, CopyIcon, RefreshIcon } from "./Icons";
 import { SpeakGlyph, useSpeech } from "./SpeakButton";
 import { Markdown } from "./Markdown";
 import { TypingDots } from "./TypingDots";
+import { TripPlanCard, type TripPlan } from "./TripPlanCard";
 
 function ActionButton({ onPress, children, label }: { onPress: () => void; children: React.ReactNode; label: string }) {
   return (
@@ -57,6 +58,7 @@ function AssistantMessage({ message, isLast }: { message: ChatMessage; isLast: b
 
   const waiting = !!message.streaming && !message.text;
   const done = !message.streaming && !!message.text;
+  const tripPlan = message.toolCalls.find((c) => c.name === "plan_trip" && c.status === "done");
 
   const copy = async () => {
     await Clipboard.setStringAsync(message.text);
@@ -78,6 +80,8 @@ function AssistantMessage({ message, isLast }: { message: ChatMessage; isLast: b
         ) : (
           <Markdown>{message.text}</Markdown>
         )}
+
+        {tripPlan ? <TripPlanCard plan={tripPlan.args as unknown as TripPlan} /> : null}
 
         {done && (
           <View style={styles.actions}>

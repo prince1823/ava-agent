@@ -8,7 +8,7 @@ export type ServerEvent =
   | { type: "error"; message: string };
 
 /** Composer mode selector — steers the agent loop for this one turn, like Claude's Plan/Agent toggle. */
-export type AgentMode = "chat" | "plan" | "promise";
+export type AgentMode = "chat" | "schedule" | "promise" | "simulate" | "travel";
 
 export type ClientMessage =
   | {
