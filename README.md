@@ -5,7 +5,8 @@ calendar, schedules real local notifications, tracks expenses in an on-device SQ
 remembers facts about you across sessions, and can plan a trip or draft a message — all through a
 streaming chat UI with human-in-the-loop confirmation before anything real-world happens.
 
-**Live demo:** _link goes here once deployed_
+**Live demo:** https://ava-agent-demo.princesaxena.workers.dev (web build; backend at
+https://ava-agent-worker.princesaxena.workers.dev)
 
 ```
 ava-agent/
